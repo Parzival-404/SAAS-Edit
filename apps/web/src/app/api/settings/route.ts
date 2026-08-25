@@ -10,6 +10,7 @@ const updateSettingsSchema = z.object({
   targetClipDurationS: z.number().int().min(10).max(180),
   tone: z.enum(["FUNNY", "PROFESSIONAL", "VIRAL", "DRAMA", "EDUCATIONAL"]),
   subtitleLanguage: z.string().min(2).max(10),
+  publishMode: z.enum(["MANUAL_VALIDATION", "AUTOMATIC"]),
 });
 
 export async function PATCH(request: Request) {

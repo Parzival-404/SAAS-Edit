@@ -18,9 +18,22 @@ type Clip = {
   sourceVideo: { title: string | null; youtubeUrl: string };
 };
 
-export function ClipLibrary({ initialClips }: { initialClips: Clip[] }) {
+type SocialAccount = {
+  id: string;
+  platform: string;
+  displayName: string;
+};
+
+export function ClipLibrary({
+  initialClips,
+  socialAccounts,
+}: {
+  initialClips: Clip[];
+  socialAccounts: SocialAccount[];
+}) {
   const [clips, setClips] = useState(initialClips);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [schedulingId, setSchedulingId] = useState<string | null>(null);
 
   async function saveClip(id: string, fields: Partial<Clip>) {
     const res = await fetch(`/api/clips/${id}`, {
@@ -59,6 +72,12 @@ export function ClipLibrary({ initialClips }: { initialClips: Clip[] }) {
           <div className="space-y-2 p-4">
             {editingId === clip.id ? (
               <ClipEditForm clip={clip} onSave={(fields) => saveClip(clip.id, fields)} />
+            ) : schedulingId === clip.id ? (
+              <ScheduleForm
+                clip={clip}
+                socialAccounts={socialAccounts}
+                onDone={() => setSchedulingId(null)}
+              />
             ) : (
               <>
                 <p className="font-semibold">{clip.title}</p>
@@ -75,13 +94,21 @@ export function ClipLibrary({ initialClips }: { initialClips: Clip[] }) {
                     Potentiel viral estimé : {Math.round(clip.viralScore * 100)}%
                   </p>
                 )}
-                <div className="flex gap-3 pt-2">
+                <div className="flex flex-wrap gap-3 pt-2">
                   <button
                     onClick={() => setEditingId(clip.id)}
                     className="text-sm font-medium text-brand-600 hover:underline"
                   >
                     Modifier
                   </button>
+                  {clip.status === "READY" && (
+                    <button
+                      onClick={() => setSchedulingId(clip.id)}
+                      className="text-sm font-medium text-brand-600 hover:underline"
+                    >
+                      Programmer
+                    </button>
+                  )}
                   {clip.videoUrl && (
                     <a
                       href={clip.videoUrl}
@@ -158,6 +185,118 @@ function ClipEditForm({
         Enregistrer
       </button>
     </div>
+  );
+}
+
+const PLATFORM_LABELS: Record<string, string> = {
+  TIKTOK: "TikTok",
+  INSTAGRAM_REELS: "Instagram Reels",
+  YOUTUBE_SHORTS: "YouTube Shorts",
+};
+
+function ScheduleForm({
+  clip,
+  socialAccounts,
+  onDone,
+}: {
+  clip: Clip;
+  socialAccounts: SocialAccount[];
+  onDone: () => void;
+}) {
+  const [socialAccountId, setSocialAccountId] = useState(socialAccounts[0]?.id ?? "");
+  const [caption, setCaption] = useState(`${clip.description}\n\n${clip.hashtags.map((h) => `#${h}`).join(" ")}`);
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (socialAccounts.length === 0) {
+    return (
+      <div className="space-y-2 text-sm">
+        <p className="text-slate-600">
+          Aucun compte social connecté. Rendez-vous dans l&apos;onglet{" "}
+          <span className="font-medium">Publication</span> pour en connecter un.
+        </p>
+        <button onClick={onDone} className="text-brand-600 hover:underline">
+          Retour
+        </button>
+      </div>
+    );
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const res = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clipId: clip.id,
+        socialAccountId,
+        caption,
+        hashtags: clip.hashtags,
+        scheduledFor: scheduledFor ? new Date(scheduledFor).toISOString() : undefined,
+      }),
+    });
+
+    setLoading(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Erreur lors de la programmation");
+      return;
+    }
+    onDone();
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-2">
+      <label className="block text-xs font-medium text-slate-500">Compte</label>
+      <select
+        value={socialAccountId}
+        onChange={(e) => setSocialAccountId(e.target.value)}
+        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+      >
+        {socialAccounts.map((account) => (
+          <option key={account.id} value={account.id}>
+            {PLATFORM_LABELS[account.platform] ?? account.platform} — {account.displayName}
+          </option>
+        ))}
+      </select>
+
+      <label className="block text-xs font-medium text-slate-500">Légende</label>
+      <textarea
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+        rows={3}
+        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+      />
+
+      <label className="block text-xs font-medium text-slate-500">
+        Programmer pour (optionnel — sinon publication dès validation)
+      </label>
+      <input
+        type="datetime-local"
+        value={scheduledFor}
+        onChange={(e) => setScheduledFor(e.target.value)}
+        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+      />
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-md bg-brand-600 px-3 py-1 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+        >
+          {loading ? "Enregistrement..." : "Programmer"}
+        </button>
+        <button type="button" onClick={onDone} className="text-sm text-slate-500 hover:underline">
+          Annuler
+        </button>
+      </div>
+    </form>
   );
 }
 

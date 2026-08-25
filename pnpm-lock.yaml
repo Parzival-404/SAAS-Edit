@@ -10,6 +10,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@saas-edit/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
       '@saas-edit/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -74,6 +77,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.658.0
         version: 3.1117.0
+      '@saas-edit/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
       '@saas-edit/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -96,6 +102,15 @@ importers:
       tsx:
         specifier: ^4.19.1
         version: 4.23.12
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@20.19.43)
+
+  packages/crypto:
+    devDependencies:
       typescript:
         specifier: ^5.6.0
         version: 5.9.3

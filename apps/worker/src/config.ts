@@ -27,4 +27,8 @@ export const config = {
   // contrôle (indépendante de checkFrequencyMinutes, propre à chaque
   // chaîne, qui décide si elle est effectivement due à ce tick).
   channelMonitorTickMs: Number(process.env.CHANNEL_MONITOR_TICK_MS ?? 5 * 60 * 1000),
+
+  // Fréquence à laquelle on vérifie quels posts programmés sont dus
+  // (scheduledFor atteint, ou immédiat si non renseigné).
+  publishSchedulerTickMs: Number(process.env.PUBLISH_SCHEDULER_TICK_MS ?? 60 * 1000),
 };

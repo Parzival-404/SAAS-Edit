@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@saas-edit/crypto": "workspace:*",
     "@saas-edit/db": "workspace:*",
     "@saas-edit/youtube-api": "workspace:*",
     "bcryptjs": "^2.4.3",

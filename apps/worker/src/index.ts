@@ -3,10 +3,12 @@ import { Queue, Worker, type Job } from "bullmq";
 import { config } from "./config.js";
 import { processVideo } from "./pipeline/processVideo.js";
 import { checkDueChannels } from "./pipeline/monitorChannels.js";
+import { publishDuePosts } from "./pipeline/publishScheduler.js";
 import type { VideoProcessingJobData } from "./types.js";
 
 const VIDEO_QUEUE_NAME = "video-processing";
 const CHANNEL_MONITOR_QUEUE_NAME = "channel-monitor-tick";
+const PUBLISH_SCHEDULER_QUEUE_NAME = "publish-scheduler-tick";
 const connection = { url: config.redisUrl };
 
 // ---- Traitement d'une vidéo (mode manuel + mode automatique) ----
@@ -58,7 +60,38 @@ scheduleChannelMonitorTick().catch((err) => {
   console.error("[channel-monitor] impossible de programmer le tick:", err);
 });
 
+// ---- Publication : tick périodique qui publie les posts programmés dus ----
+
+const publishSchedulerQueue = new Queue(PUBLISH_SCHEDULER_QUEUE_NAME, { connection });
+
+const publishSchedulerWorker = new Worker(
+  PUBLISH_SCHEDULER_QUEUE_NAME,
+  async () => {
+    await publishDuePosts();
+  },
+  { connection, concurrency: 1 },
+);
+
+publishSchedulerWorker.on("failed", (job, err) => {
+  console.error("[publish] tick en échec:", err.message);
+});
+
+async function schedulePublishTick(): Promise<void> {
+  await publishSchedulerQueue.upsertJobScheduler(
+    "publish-scheduler-tick",
+    { every: config.publishSchedulerTickMs },
+    { name: "tick" },
+  );
+}
+
+schedulePublishTick().catch((err) => {
+  console.error("[publish] impossible de programmer le tick:", err);
+});
+
 console.log("[worker] en écoute sur la file", VIDEO_QUEUE_NAME);
 console.log(
   `[worker] surveillance des chaînes toutes les ${config.channelMonitorTickMs / 1000}s`,
+);
+console.log(
+  `[worker] publication programmée vérifiée toutes les ${config.publishSchedulerTickMs / 1000}s`,
 );

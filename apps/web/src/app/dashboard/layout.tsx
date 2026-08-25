@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Vidéos" },
   { href: "/dashboard/channels", label: "Chaînes" },
   { href: "/dashboard/clips", label: "Clips" },
+  { href: "/dashboard/publishing", label: "Publication" },
   { href: "/dashboard/inspiration", label: "Inspiration" },
   { href: "/dashboard/settings", label: "Paramètres" },
 ];

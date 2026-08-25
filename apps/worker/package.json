@@ -13,6 +13,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.3",
     "@aws-sdk/client-s3": "^3.658.0",
+    "@saas-edit/crypto": "workspace:*",
     "@saas-edit/db": "workspace:*",
     "@saas-edit/youtube-api": "workspace:*",
     "bullmq": "^5.12.0",

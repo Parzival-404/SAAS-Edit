@@ -127,6 +127,7 @@ supplémentaire.
 | `ANTHROPIC_API_KEY` | Détection des moments forts, génération titres/hooks/hashtags | Étape "analyse" |
 | `OPENAI_API_KEY` (ou `WHISPER_MODE=local`) | Transcription | Étape "transcription" |
 | Bucket S3/R2 | Stockage des clips exportés | Étape "export" |
+| `ENCRYPTION_KEY` | Chiffrement des tokens des comptes sociaux connectés | Onglet "Publication" |
 | Postgres, Redis | DB et files d'attente | Tout le pipeline |
 
 ## Roadmap
@@ -163,12 +164,26 @@ supplémentaire.
   clé API publique couvre déjà les chaînes publiques, cas d'usage
   principal).
 
-### V3 — Publication et tendances
-- Connexion des comptes TikTok/Instagram/YouTube Shorts (APIs officielles).
-- Publication automatique ou programmée, avec mode validation manuelle.
-- Adaptation du format/description/hashtags par plateforme.
-- Analyse des tendances (formats, hooks, sons) via les APIs disponibles,
-  utilisée comme inspiration — jamais de copie directe.
+### 🚧 V3 — Publication et tendances (en cours)
+- ✅ Connexion des comptes TikTok/Instagram/YouTube Shorts : token API
+  saisi manuellement (chiffré AES-256-GCM avant stockage, `packages/
+  crypto`) — nécessite un token obtenu via l'app développeur de
+  l'utilisateur/opérateur sur chaque plateforme. Une vraie connexion
+  OAuth (redirection + callback) pourra remplacer cette saisie plus
+  tard sans changer le reste du pipeline.
+- ✅ Publication programmée ou immédiate, avec mode validation manuelle
+  (brouillon → "Valider") ou automatique (réglage utilisateur), adaptée
+  par plateforme (légende, hashtags). Tick worker dédié
+  (`publish-scheduler-tick`) qui publie les posts dus.
+- ✅ Adaptateurs de publication implémentés pour de vrai (pas des stubs)
+  contre les APIs officielles : YouTube Data API v3 (upload resumable),
+  TikTok Content Posting API v2 (PULL_FROM_URL), Instagram Graph API
+  (conteneur média Reels + publication) — `apps/worker/src/pipeline/
+  publishPost.ts`. Testés jusqu'à l'appel réseau réel (échec propre
+  faute de token/domaine vérifié, comme attendu sans compte développeur
+  réel).
+- ☐ Analyse des tendances (formats, hooks, sons) via les APIs
+  disponibles, utilisée comme inspiration — jamais de copie directe.
 
 ### V4 — Analytics et amélioration continue
 - Récupération des performances post-publication (vues, likes,

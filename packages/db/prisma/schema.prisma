@@ -4,7 +4,9 @@
 // bibliothèque, en mode manuel uniquement.
 // V2 : chaînes YouTube connectées + surveillance automatique (détection des
 // nouvelles vidéos, déclenchement auto du pipeline).
-// Publication et analytics arriveront aux phases suivantes (voir README).
+// V3 : comptes sociaux connectés + publication (programmée ou automatique,
+// avec validation manuelle optionnelle).
+// Analytics arriveront à la phase suivante (voir README).
 
 generator client {
   provider = "prisma-client-js"
@@ -28,6 +30,8 @@ model User {
   clips            Clip[]
   inspirationItems InspirationItem[]
   youtubeChannels  YoutubeChannel[]
+  socialAccounts   SocialAccount[]
+  scheduledPosts   ScheduledPost[]
 }
 
 model UserSettings {
@@ -41,8 +45,18 @@ model UserSettings {
   tone                Tone    @default(VIRAL)
   subtitleLanguage    String  @default("fr")
 
+  // MANUAL_VALIDATION : chaque post reste en brouillon jusqu'à validation
+  // explicite. AUTOMATIC : publié/programmé sans intervention dès que le
+  // clip est prêt (uniquement si un compte social est connecté).
+  publishMode PublishMode @default(MANUAL_VALIDATION)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum PublishMode {
+  MANUAL_VALIDATION
+  AUTOMATIC
 }
 
 enum Tone {
@@ -189,6 +203,8 @@ model Clip {
   thumbnailUrl String?
   errorMessage String?    @db.Text
 
+  scheduledPosts ScheduledPost[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -227,4 +243,84 @@ enum InspirationType {
   WORD_TO_AVOID
   TEMPLATE
   BRAND_PREFERENCE
+}
+
+model SocialAccount {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  platform    SocialPlatform
+  displayName String
+  // Identifiant du compte côté plateforme (utile pour l'API de publication
+  // et pour détecter une reconnexion du même compte).
+  externalAccountId String?
+
+  // Chiffrés (AES-256-GCM, voir apps/web/src/lib/crypto.ts) avant stockage
+  // — jamais en clair en base.
+  accessTokenEncrypted  String? @db.Text
+  refreshTokenEncrypted String? @db.Text
+  tokenExpiresAt        DateTime?
+
+  status       SocialAccountStatus @default(CONNECTED)
+  errorMessage String?             @db.Text
+
+  scheduledPosts ScheduledPost[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, platform])
+  @@index([userId])
+}
+
+enum SocialPlatform {
+  TIKTOK
+  INSTAGRAM_REELS
+  YOUTUBE_SHORTS
+}
+
+enum SocialAccountStatus {
+  CONNECTED
+  EXPIRED
+  ERROR
+}
+
+model ScheduledPost {
+  id     String @id @default(cuid())
+  clipId String
+  clip   Clip   @relation(fields: [clipId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  socialAccountId String
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  platform        SocialPlatform
+
+  caption  String   @db.Text
+  hashtags String[]
+
+  status       PostStatus @default(DRAFT)
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+
+  platformPostId  String?
+  platformPostUrl String?
+  errorMessage    String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clipId])
+  @@index([userId])
+  @@index([socialAccountId])
+  @@index([status, scheduledFor])
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
 }

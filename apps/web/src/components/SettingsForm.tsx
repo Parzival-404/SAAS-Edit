@@ -8,6 +8,7 @@ type Settings = {
   targetClipDurationS: number;
   tone: string;
   subtitleLanguage: string;
+  publishMode: string;
 };
 
 const TONE_LABELS: Record<string, string> = {
@@ -106,6 +107,36 @@ export function SettingsForm({ initialSettings }: { initialSettings: Settings })
           className="rounded-md border border-slate-300 px-3 py-2 font-normal"
         />
       </label>
+
+      <fieldset className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        Publication
+        <label className="flex items-start gap-2 font-normal">
+          <input
+            type="radio"
+            name="publishMode"
+            checked={settings.publishMode === "MANUAL_VALIDATION"}
+            onChange={() => setSettings((s) => ({ ...s, publishMode: "MANUAL_VALIDATION" }))}
+            className="mt-1"
+          />
+          <span>
+            <strong className="font-medium">Validation manuelle</strong> — chaque post reste en
+            brouillon jusqu&apos;à ce que vous cliquiez sur &quot;Valider&quot;.
+          </span>
+        </label>
+        <label className="flex items-start gap-2 font-normal">
+          <input
+            type="radio"
+            name="publishMode"
+            checked={settings.publishMode === "AUTOMATIC"}
+            onChange={() => setSettings((s) => ({ ...s, publishMode: "AUTOMATIC" }))}
+            className="mt-1"
+          />
+          <span>
+            <strong className="font-medium">Automatique</strong> — programmé directement dès
+            qu&apos;un clip est prêt, sans validation.
+          </span>
+        </label>
+      </fieldset>
 
       <button
         type="submit"
