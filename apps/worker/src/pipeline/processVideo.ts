@@ -65,6 +65,8 @@ export async function processVideo(sourceVideoId: string): Promise<void> {
             captionText: moment.captionText,
             viralScore: moment.viralScore,
             scoreReason: moment.scoreReason,
+            titleVariants: moment.titleVariants,
+            hookVariants: moment.hookVariants,
             status: "QUEUED",
           },
         }),

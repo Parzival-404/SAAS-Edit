@@ -8,6 +8,8 @@ type Clip = {
   hook: string;
   description: string;
   hashtags: string[];
+  titleVariants: string[];
+  hookVariants: string[];
   status: string;
   videoUrl: string | null;
   thumbnailUrl: string | null;
@@ -107,16 +109,29 @@ function ClipEditForm({
   onSave: (fields: Partial<Clip>) => void;
 }) {
   const [title, setTitle] = useState(clip.title);
+  const [hook, setHook] = useState(clip.hook);
   const [description, setDescription] = useState(clip.description);
   const [hashtags, setHashtags] = useState(clip.hashtags.join(", "));
 
   return (
     <div className="space-y-2">
+      <label className="block text-xs font-medium text-slate-500">Titre</label>
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
       />
+      <VariantChips variants={clip.titleVariants} current={title} onPick={setTitle} />
+
+      <label className="block text-xs font-medium text-slate-500">Hook (3 premières secondes)</label>
+      <input
+        value={hook}
+        onChange={(e) => setHook(e.target.value)}
+        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+      />
+      <VariantChips variants={clip.hookVariants} current={hook} onPick={setHook} />
+
+      <label className="block text-xs font-medium text-slate-500">Description</label>
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -133,6 +148,7 @@ function ClipEditForm({
         onClick={() =>
           onSave({
             title,
+            hook,
             description,
             hashtags: hashtags.split(",").map((t) => t.trim()).filter(Boolean),
           })
@@ -141,6 +157,35 @@ function ClipEditForm({
       >
         Enregistrer
       </button>
+    </div>
+  );
+}
+
+function VariantChips({
+  variants,
+  current,
+  onPick,
+}: {
+  variants: string[];
+  current: string;
+  onPick: (value: string) => void;
+}) {
+  const alternatives = variants.filter((v) => v !== current);
+  if (alternatives.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {alternatives.map((variant) => (
+        <button
+          key={variant}
+          type="button"
+          onClick={() => onPick(variant)}
+          title="Utiliser cette variante"
+          className="max-w-full truncate rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+        >
+          {variant}
+        </button>
+      ))}
     </div>
   );
 }

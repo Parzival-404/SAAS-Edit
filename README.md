@@ -154,8 +154,11 @@ supplémentaire.
   centré statique, avec repli automatique sur le crop centré si aucun
   visage n'est détecté ou si Python/OpenCV sont indisponibles
   (`SMART_CROP_ENABLED=false` pour désactiver explicitement).
-- ☐ Plusieurs variantes de clip par moment fort (styles/durées
-  différents).
+- ✅ Variantes de titre/hook par clip : Claude propose 2-3 formulations
+  alternatives par clip (`titleVariants`/`hookVariants`), affichées comme
+  suggestions cliquables dans l'édition d'un clip.
+- ☐ Variantes de rendu (styles de montage/durées différents pour un même
+  moment fort).
 - ☐ OAuth YouTube pour les chaînes privées/non listées (la lecture par
   clé API publique couvre déjà les chaînes publiques, cas d'usage
   principal).

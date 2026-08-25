@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 
 const updateClipSchema = z.object({
   title: z.string().min(1).max(200).optional(),
+  hook: z.string().max(500).optional(),
   description: z.string().max(2000).optional(),
   hashtags: z.array(z.string()).optional(),
 });

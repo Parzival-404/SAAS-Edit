@@ -176,6 +176,11 @@ model Clip {
   hashtags    String[]
   captionText String?  @db.Text
 
+  // Autres propositions de titre/hook générées par le LLM, pour
+  // permettre à l'utilisateur de comparer/choisir avant publication.
+  titleVariants String[]
+  hookVariants  String[]
+
   viralScore  Float?  // 0-1, potentiel viral estimé par le LLM
   scoreReason String? @db.Text
 

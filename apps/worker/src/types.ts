@@ -24,4 +24,7 @@ export type HighlightMoment = {
   captionText: string;
   viralScore: number;
   scoreReason: string;
+  // Autres formulations proposées pour comparer/choisir avant publication.
+  titleVariants: string[];
+  hookVariants: string[];
 };

@@ -54,7 +54,7 @@ Règles :
 - Privilégie phrases fortes, moments drôles/choquants/émotionnels/utiles/rythmés.
 - Évite les moments mous, trop longs ou incompréhensibles hors contexte.
 - Les extraits ne doivent pas se chevaucher.
-- Pour chaque clip retourne : startSec, endSec, title (accrocheur, court), hook (phrase pour les 3 premières secondes), description (adaptée réseaux sociaux), hashtags (5-8, sans #), captionText (texte à afficher à l'écran), viralScore (0 à 1), scoreReason (courte justification).
+- Pour chaque clip retourne : startSec, endSec, title (accrocheur, court), hook (phrase pour les 3 premières secondes), description (adaptée réseaux sociaux), hashtags (5-8, sans #), captionText (texte à afficher à l'écran), viralScore (0 à 1), scoreReason (courte justification), titleVariants (2 à 3 autres formulations du titre, angles différents), hookVariants (2 à 3 autres accroches pour les 3 premières secondes).
 
 Transcription horodatée :
 ${transcriptForPrompt}
@@ -70,10 +70,29 @@ Réponds avec un JSON de la forme { "clips": HighlightMoment[] }.`,
   }
 
   const parsed = JSON.parse(extractJson(textBlock.text)) as {
-    clips: HighlightMoment[];
+    clips: Partial<HighlightMoment>[];
   };
 
-  return parsed.clips;
+  return parsed.clips.map(normalizeMoment);
+}
+
+// Un LLM peut omettre un champ optionnel malgré les instructions : on ne
+// fait jamais planter tout le pipeline pour un tableau de variantes
+// manquant, on retombe juste sur une liste vide.
+function normalizeMoment(moment: Partial<HighlightMoment>): HighlightMoment {
+  return {
+    startSec: moment.startSec ?? 0,
+    endSec: moment.endSec ?? 0,
+    title: moment.title ?? "",
+    hook: moment.hook ?? "",
+    description: moment.description ?? "",
+    hashtags: Array.isArray(moment.hashtags) ? moment.hashtags : [],
+    captionText: moment.captionText ?? "",
+    viralScore: moment.viralScore ?? 0,
+    scoreReason: moment.scoreReason ?? "",
+    titleVariants: Array.isArray(moment.titleVariants) ? moment.titleVariants : [],
+    hookVariants: Array.isArray(moment.hookVariants) ? moment.hookVariants : [],
+  };
 }
 
 function extractJson(text: string): string {
