@@ -10,3 +10,4 @@ build/
 storage/tmp/
 apps/worker/tmp/
 *.tsbuildinfo
+dump.rdb

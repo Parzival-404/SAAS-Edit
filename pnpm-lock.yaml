@@ -13,6 +13,9 @@ importers:
       '@saas-edit/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@saas-edit/youtube-api':
+        specifier: workspace:*
+        version: link:../../packages/youtube-api
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -71,9 +74,15 @@ importers:
       '@saas-edit/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@saas-edit/youtube-api':
+        specifier: workspace:*
+        version: link:../../packages/youtube-api
       bullmq:
         specifier: ^5.12.0
         version: 5.81.3
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
       openai:
         specifier: ^4.63.0
         version: 4.104.0(zod@3.25.76)
@@ -97,6 +106,12 @@ importers:
       prisma:
         specifier: ^5.20.0
         version: 5.22.0
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+
+  packages/youtube-api:
+    devDependencies:
       typescript:
         specifier: ^5.6.0
         version: 5.9.3
@@ -679,6 +694,10 @@ packages:
 
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -1774,6 +1793,8 @@ snapshots:
   didyoumean@1.2.2: {}
 
   dlv@1.1.3: {}
+
+  dotenv@16.6.1: {}
 
   dunder-proto@1.0.1:
     dependencies:

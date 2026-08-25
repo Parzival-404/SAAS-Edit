@@ -1,9 +1,10 @@
-// SAAS-Edit — schéma de base de données (MVP)
+// SAAS-Edit — schéma de base de données
 //
-// Portée volontairement limitée au mode manuel :
-// utilisateur -> vidéo source -> job de traitement -> clips -> bibliothèque.
-// Les tables de surveillance de chaîne, publication et analytics arriveront
-// aux phases suivantes (voir README, roadmap).
+// V1 (MVP) : utilisateur -> vidéo source -> job de traitement -> clips ->
+// bibliothèque, en mode manuel uniquement.
+// V2 : chaînes YouTube connectées + surveillance automatique (détection des
+// nouvelles vidéos, déclenchement auto du pipeline).
+// Publication et analytics arriveront aux phases suivantes (voir README).
 
 generator client {
   provider = "prisma-client-js"
@@ -26,6 +27,7 @@ model User {
   sourceVideos     SourceVideo[]
   clips            Clip[]
   inspirationItems InspirationItem[]
+  youtubeChannels  YoutubeChannel[]
 }
 
 model UserSettings {
@@ -56,6 +58,10 @@ model SourceVideo {
   userId         String
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  source         VideoSource     @default(MANUAL)
+  channelId      String?
+  channel        YoutubeChannel? @relation(fields: [channelId], references: [id], onDelete: SetNull)
+
   youtubeUrl     String
   youtubeVideoId String
   title          String?
@@ -78,6 +84,7 @@ model SourceVideo {
 
   @@index([userId])
   @@index([youtubeVideoId])
+  @@index([channelId])
 }
 
 enum VideoStatus {
@@ -89,6 +96,38 @@ enum VideoStatus {
   EXPORTING
   READY
   FAILED
+}
+
+enum VideoSource {
+  MANUAL
+  CHANNEL_MONITOR
+}
+
+model YoutubeChannel {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channelId    String
+  handle       String?
+  title        String?
+  thumbnailUrl String?
+
+  monitoringEnabled     Boolean   @default(true)
+  checkFrequencyMinutes Int       @default(30)
+  lastCheckedAt         DateTime?
+  // Date de publication de la dernière vidéo déjà détectée, pour ne
+  // récupérer que les nouveautés lors du prochain sondage.
+  lastSeenPublishedAt   DateTime?
+  errorMessage          String?   @db.Text
+
+  sourceVideos SourceVideo[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, channelId])
+  @@index([userId])
 }
 
 model ProcessingJob {

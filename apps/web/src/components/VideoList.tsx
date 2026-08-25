@@ -11,6 +11,7 @@ type VideoListItem = {
   youtubeUrl: string;
   status: string;
   errorMessage: string | null;
+  source: string;
   createdAt: string;
   clips: { id: string }[];
 };
@@ -59,7 +60,14 @@ export function VideoList({ initialVideos }: { initialVideos: VideoListItem[] })
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-medium">{video.title ?? video.youtubeUrl}</p>
+            <div className="flex items-center gap-2">
+              <p className="truncate font-medium">{video.title ?? video.youtubeUrl}</p>
+              {video.source === "CHANNEL_MONITOR" && (
+                <span className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
+                  Auto
+                </span>
+              )}
+            </div>
             <p className="truncate text-sm text-slate-500">{video.youtubeUrl}</p>
             {video.status === "FAILED" && video.errorMessage && (
               <p className="truncate text-sm text-red-600" title={video.errorMessage}>

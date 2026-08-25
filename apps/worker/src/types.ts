@@ -1,3 +1,7 @@
+export type VideoProcessingJobData = {
+  sourceVideoId: string;
+};
+
 export type TranscriptSegment = {
   start: number;
   end: number;

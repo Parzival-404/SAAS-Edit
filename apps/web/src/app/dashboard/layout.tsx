@@ -4,6 +4,7 @@ import { SignOutButton } from "@/components/SignOutButton";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Vidéos" },
+  { href: "/dashboard/channels", label: "Chaînes" },
   { href: "/dashboard/clips", label: "Clips" },
   { href: "/dashboard/inspiration", label: "Inspiration" },
   { href: "/dashboard/settings", label: "Paramètres" },

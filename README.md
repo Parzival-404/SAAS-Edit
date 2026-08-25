@@ -3,12 +3,17 @@
 Agent IA qui transforme des vidéos YouTube longues en clips courts optimisés
 pour TikTok, Instagram Reels et YouTube Shorts.
 
-Ce dépôt implémente le **MVP en mode manuel** : coller un lien YouTube →
-transcription → détection des meilleurs moments → génération de clips
-verticaux avec sous-titres et hook → dashboard → téléchargement. La
-surveillance automatique de chaînes, la publication automatique, l'analyse
-des tendances et les analytics avancés arrivent dans les phases suivantes
-(voir [Roadmap](#roadmap)).
+Ce dépôt implémente le **MVP (mode manuel)** et le début de la **V2
+(mode automatique)** :
+- Mode manuel : coller un lien YouTube → transcription → détection des
+  meilleurs moments → génération de clips verticaux avec sous-titres et
+  hook → dashboard → téléchargement.
+- Mode automatique : connecter une chaîne YouTube → surveillance
+  périodique (fréquence configurable par chaîne) → détection des
+  nouvelles vidéos → déclenchement automatique du même pipeline.
+
+La publication automatique, l'analyse des tendances et les analytics
+avancés arrivent dans les phases suivantes (voir [Roadmap](#roadmap)).
 
 ## Architecture
 
@@ -17,18 +22,26 @@ des tendances et les analytics avancés arrivent dans les phases suivantes
                          │   apps/web        │  Next.js (App Router)
                          │   - Auth (NextAuth)│
                          │   - Dashboard      │
+                         │   - Chaînes        │
                          │   - API routes     │──┐
                          └──────────────────┘   │
                                   │ Prisma       │ enqueue job
                                   ▼              ▼
                          ┌──────────────────┐  ┌──────────────┐
                          │   PostgreSQL      │  │  Redis/BullMQ │
-                         │   (packages/db)   │  │  file d'attente│
+                         │   (packages/db)   │  │  2 files       │
                          └──────────────────┘  └──────┬───────┘
                                   ▲                    │
                                   │ Prisma              ▼
                          ┌──────────────────────────────────┐
                          │   apps/worker (BullMQ worker)      │
+                         │                                    │
+                         │   Tick périodique (mode auto) :    │
+                         │   YouTube Data API → détecte les   │
+                         │   nouvelles vidéos des chaînes      │
+                         │   connectées → enfile le pipeline  │
+                         │                                    │
+                         │   Pipeline par vidéo (manuel+auto): │
                          │   1. yt-dlp   → téléchargement     │
                          │   2. Whisper  → transcription      │
                          │   3. Claude   → moments forts,     │
@@ -42,21 +55,28 @@ des tendances et les analytics avancés arrivent dans les phases suivantes
 - **Frontend/Backend** : Next.js 14 (App Router), API routes, Tailwind CSS.
 - **Base de données** : PostgreSQL + Prisma (`packages/db`, schéma partagé).
 - **File d'attente** : BullMQ + Redis — le traitement vidéo est toujours
-  asynchrone, jamais bloquant côté web.
+  asynchrone, jamais bloquant côté web. Deux files : `video-processing`
+  (pipeline par vidéo) et `channel-monitor-tick` (sondage périodique des
+  chaînes connectées, via un job scheduler BullMQ).
 - **Worker vidéo** : service Node séparé (conteneurisé), avec `ffmpeg` et
   `yt-dlp` pour ne jamais faire de traitement lourd dans le serverless.
 - **Stockage** : tout stockage S3-compatible (Cloudflare R2 recommandé).
 - **IA** : Claude (analyse des moments forts, génération de titres/hooks/
   hashtags) + Whisper (transcription, API OpenAI ou faster-whisper local).
+- **YouTube Data API v3** (`packages/youtube-api`) : résolution d'une
+  chaîne (URL/@handle → channelId) et détection des nouvelles vidéos via
+  la playlist "uploads" — clé API publique, pas d'OAuth requis puisqu'on
+  ne lit que des métadonnées publiques.
 
 ## Structure du dépôt
 
 ```
 apps/
-  web/       Next.js — dashboard, auth, API
-  worker/    Worker BullMQ — pipeline de traitement vidéo
+  web/          Next.js — dashboard, auth, API
+  worker/       Worker BullMQ — pipeline vidéo + tick de surveillance
 packages/
-  db/        Schéma Prisma partagé + client
+  db/           Schéma Prisma partagé + client
+  youtube-api/  Client YouTube Data API v3 (résolution chaîne, uploads)
 docker-compose.yml   Postgres + Redis pour le dev local
 ```
 
@@ -86,18 +106,22 @@ pnpm dev:worker
 ```
 
 Le dashboard est disponible sur http://localhost:3000. Créez un compte,
-collez un lien YouTube, et suivez le statut du traitement en direct
-(en attente → téléchargement → transcription → analyse → montage → export
-→ prêt).
+collez un lien YouTube (onglet "Vidéos"), et suivez le statut du
+traitement en direct (en attente → téléchargement → transcription →
+analyse → montage → export → prêt). Pour le mode automatique, connectez
+une chaîne depuis l'onglet "Chaînes" : le worker la surveille et
+déclenche le pipeline dès qu'une nouvelle vidéo est publiée, sans action
+supplémentaire.
 
 ### Clés/services externes nécessaires
 
 | Service | Usage | Requis pour |
 |---|---|---|
+| `YOUTUBE_API_KEY` | Résolution de chaîne + détection des nouvelles vidéos | Onglet "Chaînes" / mode automatique |
 | `ANTHROPIC_API_KEY` | Détection des moments forts, génération titres/hooks/hashtags | Étape "analyse" |
 | `OPENAI_API_KEY` (ou `WHISPER_MODE=local`) | Transcription | Étape "transcription" |
 | Bucket S3/R2 | Stockage des clips exportés | Étape "export" |
-| Postgres, Redis | DB et file d'attente | Tout le pipeline |
+| Postgres, Redis | DB et files d'attente | Tout le pipeline |
 
 ## Roadmap
 
@@ -112,14 +136,20 @@ collez un lien YouTube, et suivez le statut du traitement en direct
   mots à éviter) injectée dans le prompt de génération.
 - Statuts de traitement visibles en temps réel.
 
-### V2 — Automatisation
-- Connexion de chaîne YouTube (OAuth + YouTube Data API v3) et
-  surveillance périodique (fréquence configurable).
-- Détection automatique des nouvelles vidéos, déclenchement auto du
-  pipeline.
-- Recadrage intelligent (tracking de sujet/visage) au lieu du crop centré
-  statique.
-- Plusieurs variantes de clip par moment fort (styles/durées différents).
+### 🚧 V2 — Automatisation (en cours)
+- ✅ Connexion de chaîne YouTube (YouTube Data API v3, lecture publique)
+  et surveillance périodique (fréquence configurable par chaîne, tick
+  BullMQ toutes les 5 min qui sonde les chaînes dues).
+- ✅ Détection automatique des nouvelles vidéos (dédupliquées par
+  `youtubeVideoId`), déclenchement auto du même pipeline que le mode
+  manuel, badge "Auto" dans le dashboard pour les distinguer.
+- ☐ Recadrage intelligent (tracking de sujet/visage) au lieu du crop
+  centré statique.
+- ☐ Plusieurs variantes de clip par moment fort (styles/durées
+  différents).
+- ☐ OAuth YouTube pour les chaînes privées/non listées (la lecture par
+  clé API publique couvre déjà les chaînes publiques, cas d'usage
+  principal).
 
 ### V3 — Publication et tendances
 - Connexion des comptes TikTok/Instagram/YouTube Shorts (APIs officielles).
