@@ -1,0 +1,8 @@
+# Dépendances Python du worker pour le recadrage intelligent (smart_crop.py).
+# Version d'OpenCV épinglée volontairement : la branche 5.x a retiré
+# cv2.CascadeClassifier des bindings Python (remplacé par FaceDetectorYN,
+# qui nécessite un modèle ONNX séparé à télécharger) — on reste sur la
+# dernière 4.x qui embarque directement les cascades Haar, sans dépendance
+# réseau supplémentaire au build.
+opencv-python-headless==4.10.0.84
+numpy>=1.24,<3

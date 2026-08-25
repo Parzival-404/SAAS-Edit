@@ -1,0 +1,2 @@
+# Optionnel — uniquement si WHISPER_MODE=local (transcribe_local.py).
+faster-whisper>=1.0.0

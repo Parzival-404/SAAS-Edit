@@ -11,3 +11,5 @@ storage/tmp/
 apps/worker/tmp/
 *.tsbuildinfo
 dump.rdb
+__pycache__/
+*.pyc

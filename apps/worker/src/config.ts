@@ -15,6 +15,12 @@ export const config = {
   whisperMode: (process.env.WHISPER_MODE as "api" | "local") ?? "api",
   youtubeApiKey: process.env.YOUTUBE_API_KEY ?? "",
 
+  // Recadrage 9:16 en suivant le sujet principal (détection de visage +
+  // lissage) au lieu d'un crop centré statique. Désactivable si Python/
+  // OpenCV ne sont pas disponibles dans l'environnement de déploiement —
+  // le pipeline retombe alors automatiquement sur le crop centré.
+  smartCropEnabled: process.env.SMART_CROP_ENABLED !== "false",
+
   tmpDir: process.env.WORKER_TMP_DIR ?? "/tmp/saas-edit",
 
   // Fréquence à laquelle on vérifie QUELLES chaînes sont dues pour un

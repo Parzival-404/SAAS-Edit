@@ -67,6 +67,9 @@ avancés arrivent dans les phases suivantes (voir [Roadmap](#roadmap)).
   chaîne (URL/@handle → channelId) et détection des nouvelles vidéos via
   la playlist "uploads" — clé API publique, pas d'OAuth requis puisqu'on
   ne lit que des métadonnées publiques.
+- **Recadrage intelligent** (`apps/worker/scripts/smart_crop.py`) :
+  OpenCV (détection de visage + lissage temporel) pour suivre le sujet
+  principal plutôt qu'un crop centré fixe.
 
 ## Structure du dépôt
 
@@ -83,7 +86,10 @@ docker-compose.yml   Postgres + Redis pour le dev local
 ## Démarrer en local
 
 Prérequis : Node ≥ 20, pnpm, Docker (pour Postgres/Redis), `ffmpeg` et
-`yt-dlp` installés localement si vous lancez le worker hors Docker.
+`yt-dlp` installés localement si vous lancez le worker hors Docker, ainsi
+que Python 3 + `pip install -r apps/worker/scripts/requirements.txt`
+pour le recadrage intelligent (sinon le pipeline retombe automatiquement
+sur un crop centré, voir `SMART_CROP_ENABLED` dans `.env.example`).
 
 ```bash
 # 1. Dépendances
@@ -143,8 +149,11 @@ supplémentaire.
 - ✅ Détection automatique des nouvelles vidéos (dédupliquées par
   `youtubeVideoId`), déclenchement auto du même pipeline que le mode
   manuel, badge "Auto" dans le dashboard pour les distinguer.
-- ☐ Recadrage intelligent (tracking de sujet/visage) au lieu du crop
-  centré statique.
+- ✅ Recadrage intelligent : détection de visage (OpenCV, `smart_crop.py`)
+  + lissage temporel pour suivre le sujet principal au lieu d'un crop
+  centré statique, avec repli automatique sur le crop centré si aucun
+  visage n'est détecté ou si Python/OpenCV sont indisponibles
+  (`SMART_CROP_ENABLED=false` pour désactiver explicitement).
 - ☐ Plusieurs variantes de clip par moment fort (styles/durées
   différents).
 - ☐ OAuth YouTube pour les chaînes privées/non listées (la lecture par

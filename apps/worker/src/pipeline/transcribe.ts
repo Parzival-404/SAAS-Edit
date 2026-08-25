@@ -1,9 +1,14 @@
 import { createReadStream } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
 import { runCommand } from "../lib/exec.js";
 import { config } from "../config.js";
 import type { TranscriptResult } from "../types.js";
+
+const LOCAL_WHISPER_SCRIPT = fileURLToPath(
+  new URL("../../scripts/transcribe_local.py", import.meta.url),
+);
 
 /**
  * Transcrit l'audio de la vidéo avec horodatage par segment.
@@ -68,7 +73,7 @@ async function transcribeLocal(
   workDir: string,
 ): Promise<TranscriptResult> {
   const { stdout } = await runCommand("python3", [
-    path.resolve("scripts/transcribe_local.py"),
+    LOCAL_WHISPER_SCRIPT,
     audioPath,
   ], { cwd: workDir });
 
