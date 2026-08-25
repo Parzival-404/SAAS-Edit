@@ -10,6 +10,7 @@ type VideoListItem = {
   thumbnailUrl: string | null;
   youtubeUrl: string;
   status: string;
+  errorMessage: string | null;
   createdAt: string;
   clips: { id: string }[];
 };
@@ -60,6 +61,11 @@ export function VideoList({ initialVideos }: { initialVideos: VideoListItem[] })
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium">{video.title ?? video.youtubeUrl}</p>
             <p className="truncate text-sm text-slate-500">{video.youtubeUrl}</p>
+            {video.status === "FAILED" && video.errorMessage && (
+              <p className="truncate text-sm text-red-600" title={video.errorMessage}>
+                {video.errorMessage}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-3">
             {video.clips.length > 0 && (
