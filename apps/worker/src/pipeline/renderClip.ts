@@ -173,8 +173,28 @@ async function trySmartCrop(
   }
 }
 
+/**
+ * Échappe un texte pour l'insérer dans un `text='...'` de drawtext.
+ *
+ * Le tokenizer ffmpeg copie tout caractère littéralement (y compris un
+ * backslash) tant qu'il est entre guillemets simples — un backslash
+ * n'échappe RIEN à l'intérieur d'une valeur citée, il n'est traité comme
+ * séquence d'échappement qu'EN DEHORS des guillemets. `text.replace(/'/g,
+ * "\\'")` ne protège donc rien : le premier guillemet simple du texte
+ * termine quand même la valeur citée, et tout ce qui suit (`,`, `;`,
+ * `[`, `]`...) est alors réinterprété comme syntaxe de filtergraph,
+ * permettant d'injecter un filtre ffmpeg supplémentaire dans le `-vf`.
+ *
+ * La bonne technique (documentée par ffmpeg) pour un guillemet simple
+ * littéral à l'intérieur d'une valeur citée : fermer la citation,
+ * insérer un guillemet échappé en mode non cité (où le backslash
+ * fonctionne), rouvrir la citation — remplacer `'` par `'\''`. On
+ * échappe aussi `%`, que drawtext utilise pour l'expansion de fonctions
+ * dynamiques (`%{expr:...}`, `%{localtime}`...), en le doublant (`%%`
+ * est sa méthode documentée pour produire un `%` littéral).
+ */
 export function escapeDrawtext(text: string): string {
-  return text.replace(/'/g, "\\'").replace(/:/g, "\\:");
+  return text.replace(/%/g, "%%").replace(/'/g, "'\\''");
 }
 
 /**

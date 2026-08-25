@@ -39,9 +39,25 @@ export async function generateSubtitleFile(
   const lines = relevant.map((segment) => {
     const start = Math.max(0, segment.start - clipStart);
     const end = Math.min(clipEnd - clipStart, segment.end - clipStart);
-    const text = segment.text.replace(/\n/g, " ").trim();
+    const text = sanitizeAssText(segment.text);
     return `Dialogue: 0,${formatAssTime(start)},${formatAssTime(end)},Default,${text}`;
   });
 
   await writeFile(outputPath, ASS_HEADER + lines.join("\n") + "\n", "utf-8");
+}
+
+/**
+ * `{` et `}` délimitent des blocs de tags de style ASS (ex: `{\pos(...)}`).
+ * Un segment de transcription qui contiendrait littéralement ces
+ * caractères (improbable mais pas impossible selon le transcripteur)
+ * serait sinon interprété par libass comme un override de style au lieu
+ * d'un texte affiché — remplacés par leurs équivalents pleine chasse,
+ * visuellement quasi identiques mais syntaxiquement inertes pour ASS.
+ */
+function sanitizeAssText(text: string): string {
+  return text
+    .replace(/\n/g, " ")
+    .replace(/\{/g, "｛")
+    .replace(/\}/g, "｝")
+    .trim();
 }

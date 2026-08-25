@@ -70,4 +70,18 @@ describe("generateSubtitleFile", () => {
     const content = await readFile(outputPath, "utf-8");
     expect(content).toContain("ligne un ligne deux");
   });
+
+  it("neutralise les accolades pour éviter qu'elles soient lues comme des tags de style ASS", async () => {
+    const outputPath = path.join(workDir, "test.ass");
+    await generateSubtitleFile(
+      [{ start: 0, end: 2, text: "{\\pos(0,0)}texte déplacé {rire}" }],
+      0,
+      5,
+      outputPath,
+    );
+    const content = await readFile(outputPath, "utf-8");
+    expect(content).not.toContain("{\\pos");
+    expect(content).not.toContain("{rire}");
+    expect(content).toContain("｛\\pos(0,0)｝texte déplacé ｛rire｝");
+  });
 });

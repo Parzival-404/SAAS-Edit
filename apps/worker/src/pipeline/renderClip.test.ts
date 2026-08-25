@@ -38,15 +38,47 @@ describe("wrapTitle", () => {
 });
 
 describe("escapeDrawtext", () => {
-  it("échappe les apostrophes", () => {
-    expect(escapeDrawtext("L'IA c'est fort")).toBe("L\\'IA c\\'est fort");
+  it("échappe une apostrophe via la séquence ferme-citation/échappe/rouvre-citation", () => {
+    // C'est la seule technique qui fonctionne réellement : un backslash
+    // seul (\\') ne protège rien à l'intérieur d'un text='...' pour
+    // ffmpeg, voir le commentaire de escapeDrawtext.
+    expect(escapeDrawtext("L'IA")).toBe("L'\\''IA");
   });
 
-  it("échappe les deux-points", () => {
-    expect(escapeDrawtext("Titre: sous-titre")).toBe("Titre\\: sous-titre");
+  it("laisse passer les métacaractères de filtergraph inchangés (sûrs entre guillemets)", () => {
+    // `:` `,` `;` `[` `]` ne sont dangereux QUE hors des guillemets. Tant
+    // qu'ils restent à l'intérieur de text='...', ffmpeg les traite comme
+    // du texte littéral — pas besoin (et pas correct) de les échapper.
+    expect(escapeDrawtext("Titre: partie 1, partie 2 [important]")).toBe(
+      "Titre: partie 1, partie 2 [important]",
+    );
+  });
+
+  it("double les % (syntaxe d'expansion de fonctions drawtext)", () => {
+    expect(escapeDrawtext("100% viral")).toBe("100%% viral");
   });
 
   it("laisse intact un texte sans caractères spéciaux", () => {
     expect(escapeDrawtext("Texte normal")).toBe("Texte normal");
+  });
+
+  it("neutralise une tentative d'injection de filtre supplémentaire", () => {
+    // Un titre malveillant qui tenterait de sortir du text='...' pour
+    // injecter un filtre ffmpeg additionnel (ex. via prompt injection
+    // dans la transcription analysée par le LLM) doit rester une simple
+    // apostrophe littérale suivie de texte, jamais une citation rouverte
+    // sans échappement correspondant.
+    const malicious = "x' ,movie=/etc/passwd[bg];[bg]overlay,drawtext=text='y";
+    const escaped = escapeDrawtext(malicious);
+    // Chaque guillemet simple d'origine doit être suivi de la séquence
+    // d'échappement complète — jamais un guillemet brut isolé qui
+    // terminerait la citation sans réouverture.
+    const rawQuoteCount = (escaped.match(/'/g) ?? []).length;
+    const escapeSequenceCount = (escaped.match(/'\\''/g) ?? []).length;
+    // Chaque séquence d'échappement consomme 3 des guillemets comptés
+    // (') + (\') + ('), donc rawQuoteCount doit être un multiple exact
+    // de 3 correspondant au nombre de guillemets d'origine échappés.
+    expect(rawQuoteCount).toBe(escapeSequenceCount * 3);
+    expect(escapeSequenceCount).toBe((malicious.match(/'/g) ?? []).length);
   });
 });
