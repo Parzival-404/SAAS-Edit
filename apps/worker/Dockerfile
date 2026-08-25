@@ -16,6 +16,12 @@ WORKDIR /app
 COPY . .
 RUN pip3 install --no-cache-dir --break-system-packages \
       -r apps/worker/scripts/requirements.txt
-RUN corepack enable && pnpm install --frozen-lockfile && pnpm --filter @saas-edit/worker build
+# pnpm bloque les scripts postinstall par défaut (dont celui de
+# @prisma/client) : sans génération explicite, le client Prisma importé
+# par le worker n'existerait pas au runtime.
+RUN corepack enable \
+    && pnpm install --frozen-lockfile \
+    && pnpm --filter @saas-edit/db generate \
+    && pnpm --filter @saas-edit/worker build
 
 CMD ["node", "apps/worker/dist/index.js"]

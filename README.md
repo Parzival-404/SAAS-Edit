@@ -130,6 +130,78 @@ supplémentaire.
 | `ENCRYPTION_KEY` | Chiffrement des tokens des comptes sociaux connectés | Onglet "Publication" |
 | Postgres, Redis | DB et files d'attente | Tout le pipeline |
 
+## Déployer en production
+
+Le web et le worker se déploient séparément — le worker fait du
+traitement vidéo long (téléchargement, ffmpeg, IA), il lui faut un hôte
+qui supporte les processus de fond de longue durée, pas du serverless à
+la Vercel.
+
+### 1. Base de données — Supabase ou Neon (gratuit pour démarrer)
+
+Créez un projet Postgres, récupérez l'URL de connexion pour
+`DATABASE_URL`. Depuis votre machine (une seule fois, ou à chaque
+migration) :
+
+```bash
+DATABASE_URL="<url-de-prod>" pnpm --filter @saas-edit/db deploy
+```
+
+### 2. Redis — Upstash (gratuit pour démarrer)
+
+Créez une base Redis, récupérez l'URL pour `REDIS_URL`.
+
+### 3. Stockage — Cloudflare R2 (gratuit jusqu'à 10 Go)
+
+Créez un bucket, une clé API (accès S3), et activez l'accès public
+(ou un domaine personnalisé) pour `STORAGE_PUBLIC_BASE_URL` — les URLs
+de clips doivent être accessibles publiquement pour l'upload vers
+TikTok/Instagram (`PULL_FROM_URL`) et l'aperçu vidéo dans le dashboard.
+
+### 4. Worker — Railway (le plus simple) ou Fly.io
+
+Le worker a un `Dockerfile` prêt à l'emploi (`apps/worker/Dockerfile`,
+contexte de build = racine du repo, pas `apps/worker/`) qui installe
+ffmpeg, yt-dlp, Python/OpenCV et compile le worker.
+
+**Railway** détecte automatiquement le Dockerfile : créez un service à
+partir de ce repo, pointez le "Root Directory" sur la racine du repo et
+le "Dockerfile Path" sur `apps/worker/Dockerfile`, renseignez les
+variables d'environnement (voir tableau ci-dessus + `.env.example`),
+déployez. Pas de port HTTP à exposer, c'est un worker de fond.
+
+**Fly.io** fonctionne aussi bien (`fly launch` en pointant sur le même
+Dockerfile) — suivez leur documentation pour un service sans
+`http_service` (processus de fond pur), leur schéma de config évoluant
+régulièrement mieux vaut se fier à `fly launch` pour générer le
+`fly.toml` que d'en écrire un à la main.
+
+⚠️ Point de vigilance vérifié en construisant ce projet : pnpm bloque
+par défaut les scripts `postinstall` (dont celui de `@prisma/client`).
+Le `Dockerfile` lance donc explicitement `pnpm --filter @saas-edit/db
+generate` avant le build — si vous adaptez le Dockerfile, gardez cette
+étape, sinon le worker plante au démarrage (« did you forget to run
+prisma generate? »).
+
+### 5. Web — Vercel
+
+Importez le repo, réglez le "Root Directory" du projet sur `apps/web`
+(support monorepo natif de Vercel). `apps/web/package.json` définit un
+script `vercel-build` (Vercel l'utilise automatiquement à la place de
+`build` s'il existe) qui lance `prisma generate` avant `next build` —
+même piège que pour le worker. Renseignez les variables d'environnement
+du tableau ci-dessus dans les réglages du projet Vercel.
+
+Un endpoint de santé est exposé sur `GET /api/health` (vérifie aussi
+que la DB répond) — utile pour le monitoring externe.
+
+### Ordre de déploiement recommandé
+
+DB et Redis d'abord (le worker et le web en dépendent tous les deux),
+puis le worker, puis le web. Testez `/api/health` une fois le web
+déployé, puis collez un lien YouTube pour vérifier que le worker traite
+bien la vidéo de bout en bout.
+
 ## Roadmap
 
 ### ✅ V1 — MVP (ce dépôt)
