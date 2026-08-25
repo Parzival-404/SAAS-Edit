@@ -1,0 +1,24 @@
+{
+  "name": "@saas-edit/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.3",
+    "@aws-sdk/client-s3": "^3.658.0",
+    "@saas-edit/db": "workspace:*",
+    "bullmq": "^5.12.0",
+    "openai": "^4.63.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.0"
+  }
+}
