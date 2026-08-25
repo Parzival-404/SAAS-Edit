@@ -173,7 +173,7 @@ async function trySmartCrop(
   }
 }
 
-function escapeDrawtext(text: string): string {
+export function escapeDrawtext(text: string): string {
   return text.replace(/'/g, "\\'").replace(/:/g, "\\:");
 }
 
@@ -182,7 +182,7 @@ function escapeDrawtext(text: string): string {
  * titre un peu long déborde du cadre vertical. On le découpe en lignes
  * courtes (mots entiers) avant de l'incruster.
  */
-function wrapTitle(text: string, maxCharsPerLine = 22, maxLines = 3): string {
+export function wrapTitle(text: string, maxCharsPerLine = 22, maxLines = 3): string {
   const words = text.trim().split(/\s+/);
   const lines: string[] = [];
   let current = "";

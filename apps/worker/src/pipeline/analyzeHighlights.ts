@@ -79,7 +79,7 @@ Réponds avec un JSON de la forme { "clips": HighlightMoment[] }.`,
 // Un LLM peut omettre un champ optionnel malgré les instructions : on ne
 // fait jamais planter tout le pipeline pour un tableau de variantes
 // manquant, on retombe juste sur une liste vide.
-function normalizeMoment(moment: Partial<HighlightMoment>): HighlightMoment {
+export function normalizeMoment(moment: Partial<HighlightMoment>): HighlightMoment {
   return {
     startSec: moment.startSec ?? 0,
     endSec: moment.endSec ?? 0,
@@ -95,7 +95,7 @@ function normalizeMoment(moment: Partial<HighlightMoment>): HighlightMoment {
   };
 }
 
-function extractJson(text: string): string {
+export function extractJson(text: string): string {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start === -1 || end === -1) {
