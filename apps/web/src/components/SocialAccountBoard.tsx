@@ -58,11 +58,11 @@ export function SocialAccountBoard({
 
   return (
     <div>
-      <form onSubmit={connect} className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:grid-cols-2">
+      <form onSubmit={connect} className="card grid gap-3 p-4 sm:grid-cols-2">
         <select
           value={platform}
           onChange={(e) => setPlatform(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
+          className="input sm:col-span-2"
         >
           {Object.entries(PLATFORM_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
@@ -75,7 +75,7 @@ export function SocialAccountBoard({
           placeholder="Nom / @handle du compte"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
+          className="input sm:col-span-2"
         />
         <input
           required
@@ -83,7 +83,7 @@ export function SocialAccountBoard({
           placeholder="Token d'accès API de la plateforme"
           value={accessToken}
           onChange={(e) => setAccessToken(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
+          className="input sm:col-span-2"
         />
         <p className="text-xs text-slate-500 sm:col-span-2">
           Nécessite un token obtenu via votre propre application développeur sur la
@@ -93,21 +93,21 @@ export function SocialAccountBoard({
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-700 disabled:opacity-50 sm:col-span-2 sm:w-fit"
+          className="btn-primary disabled:opacity-50 sm:col-span-2 sm:w-fit"
         >
           {loading ? "Connexion..." : "Connecter le compte"}
         </button>
       </form>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
-      <ul className="mt-6 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+      <ul className="card mt-6 divide-y divide-slate-100">
         {accounts.length === 0 && (
-          <li className="p-4 text-sm text-slate-500">Aucun compte social connecté.</li>
+          <li className="p-6 text-sm text-slate-500">Aucun compte social connecté.</li>
         )}
         {accounts.map((account) => (
           <li key={account.id} className="flex items-center gap-4 p-4">
             <div className="min-w-0 flex-1">
-              <p className="font-medium">
+              <p className="font-medium text-slate-900">
                 {PLATFORM_LABELS[account.platform] ?? account.platform} — {account.displayName}
               </p>
               {account.errorMessage && (
@@ -115,10 +115,10 @@ export function SocialAccountBoard({
               )}
             </div>
             <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
+              className={`badge ${
                 account.status === "CONNECTED"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-green-50 text-green-700"
+                  : "bg-red-50 text-red-700"
               }`}
             >
               {account.status === "CONNECTED" ? "Connecté" : account.status}

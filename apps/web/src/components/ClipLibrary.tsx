@@ -59,7 +59,7 @@ export function ClipLibrary({
   return (
     <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {clips.map((clip) => (
-        <div key={clip.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div key={clip.id} className="card overflow-hidden">
           <div className="flex aspect-[9/16] items-center justify-center bg-slate-900">
             {clip.videoUrl ? (
               <video src={clip.videoUrl} controls className="h-full w-full object-cover" />
@@ -80,11 +80,11 @@ export function ClipLibrary({
               />
             ) : (
               <>
-                <p className="font-semibold">{clip.title}</p>
+                <p className="font-semibold text-slate-900">{clip.title}</p>
                 <p className="text-sm text-slate-600">{clip.hook}</p>
                 <div className="flex flex-wrap gap-1">
                   {clip.hashtags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-brand-50 px-2 py-0.5 text-xs text-brand-700">
+                    <span key={tag} className="badge bg-brand-50 text-brand-700">
                       #{tag}
                     </span>
                   ))}
@@ -146,7 +146,7 @@ function ClipEditForm({
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+        className="input w-full px-2 py-1 text-sm"
       />
       <VariantChips variants={clip.titleVariants} current={title} onPick={setTitle} />
 
@@ -154,7 +154,7 @@ function ClipEditForm({
       <input
         value={hook}
         onChange={(e) => setHook(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+        className="input w-full px-2 py-1 text-sm"
       />
       <VariantChips variants={clip.hookVariants} current={hook} onPick={setHook} />
 
@@ -163,13 +163,13 @@ function ClipEditForm({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         rows={2}
-        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+        className="input w-full px-2 py-1 text-sm"
       />
       <input
         value={hashtags}
         onChange={(e) => setHashtags(e.target.value)}
         placeholder="hashtags séparés par des virgules"
-        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+        className="input w-full px-2 py-1 text-sm"
       />
       <button
         onClick={() =>
@@ -180,7 +180,7 @@ function ClipEditForm({
             hashtags: hashtags.split(",").map((t) => t.trim()).filter(Boolean),
           })
         }
-        className="rounded-md bg-brand-600 px-3 py-1 text-sm font-medium text-white hover:bg-brand-700"
+        className="btn-primary px-3 py-1 text-sm"
       >
         Enregistrer
       </button>
@@ -255,7 +255,7 @@ function ScheduleForm({
       <select
         value={socialAccountId}
         onChange={(e) => setSocialAccountId(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+        className="input w-full px-2 py-1 text-sm"
       >
         {socialAccounts.map((account) => (
           <option key={account.id} value={account.id}>
@@ -269,7 +269,7 @@ function ScheduleForm({
         value={caption}
         onChange={(e) => setCaption(e.target.value)}
         rows={3}
-        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+        className="input w-full px-2 py-1 text-sm"
       />
 
       <label className="block text-xs font-medium text-slate-500">
@@ -279,7 +279,7 @@ function ScheduleForm({
         type="datetime-local"
         value={scheduledFor}
         onChange={(e) => setScheduledFor(e.target.value)}
-        className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+        className="input w-full px-2 py-1 text-sm"
       />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -288,7 +288,7 @@ function ScheduleForm({
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-brand-600 px-3 py-1 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+          className="btn-primary px-3 py-1 text-sm disabled:opacity-50"
         >
           {loading ? "Enregistrement..." : "Programmer"}
         </button>
@@ -320,7 +320,7 @@ function VariantChips({
           type="button"
           onClick={() => onPick(variant)}
           title="Utiliser cette variante"
-          className="max-w-full truncate rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+          className="badge max-w-full truncate border border-slate-200 bg-slate-50 text-slate-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
         >
           {variant}
         </button>

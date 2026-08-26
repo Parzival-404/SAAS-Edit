@@ -7,5 +7,39 @@
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-white font-sans text-slate-900 antialiased;
+}
+
+h1,
+h2,
+h3 {
+  @apply tracking-tight;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-brand-600 px-6 py-3
+      font-medium text-white shadow-soft transition-all duration-200
+      hover:bg-brand-700 hover:shadow-soft-lg active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-slate-300
+      bg-white px-6 py-3 font-medium text-slate-800 transition-all duration-200
+      hover:border-slate-400 hover:bg-slate-50 active:scale-[0.98];
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-soft;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm
+      text-slate-900 transition-colors placeholder:text-slate-400
+      focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+  }
 }

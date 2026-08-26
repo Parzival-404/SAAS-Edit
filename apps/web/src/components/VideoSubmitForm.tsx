@@ -32,23 +32,23 @@ export function VideoSubmitForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row">
+    <form onSubmit={onSubmit} className="card flex flex-col gap-3 p-2 sm:flex-row sm:p-2">
       <input
         type="url"
         required
         placeholder="https://www.youtube.com/watch?v=..."
         value={url}
         onChange={(e) => setUrl(e.target.value)}
-        className="flex-1 rounded-lg border border-slate-300 px-4 py-3"
+        className="input flex-1 border-0 shadow-none focus:ring-0"
       />
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-brand-600 px-6 py-3 font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+        className="btn-primary shrink-0 disabled:opacity-50"
       >
         {loading ? "Ajout..." : "Générer des clips"}
       </button>
-      {error && <p className="text-sm text-red-600 sm:ml-4 sm:self-center">{error}</p>}
+      {error && <p className="text-sm text-red-600 sm:ml-2 sm:self-center">{error}</p>}
     </form>
   );
 }

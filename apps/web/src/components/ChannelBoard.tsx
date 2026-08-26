@@ -62,18 +62,18 @@ export function ChannelBoard({ initialChannels }: { initialChannels: Channel[] }
 
   return (
     <div>
-      <form onSubmit={addChannel} className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row">
+      <form onSubmit={addChannel} className="card flex flex-col gap-3 p-4 sm:flex-row">
         <input
           required
           placeholder="Lien de la chaîne ou @handle"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="flex-1 rounded-md border border-slate-300 px-3 py-2"
+          className="input flex-1"
         />
         <select
           value={frequency}
           onChange={(e) => setFrequency(Number(e.target.value))}
-          className="rounded-md border border-slate-300 px-3 py-2"
+          className="input sm:w-auto"
         >
           <option value={15}>Toutes les 15 min</option>
           <option value={30}>Toutes les 30 min</option>
@@ -81,19 +81,15 @@ export function ChannelBoard({ initialChannels }: { initialChannels: Channel[] }
           <option value={360}>Toutes les 6h</option>
           <option value={1440}>Une fois par jour</option>
         </select>
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-md bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
+        <button type="submit" disabled={loading} className="btn-primary disabled:opacity-50">
           {loading ? "Ajout..." : "Connecter la chaîne"}
         </button>
       </form>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
-      <ul className="mt-6 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+      <ul className="card mt-6 divide-y divide-slate-100">
         {channels.length === 0 && (
-          <li className="p-4 text-sm text-slate-500">
+          <li className="p-6 text-sm text-slate-500">
             Aucune chaîne connectée. L&apos;agent surveillera automatiquement les
             chaînes ajoutées ici et générera des clips dès qu&apos;une nouvelle
             vidéo est publiée.
@@ -113,7 +109,7 @@ export function ChannelBoard({ initialChannels }: { initialChannels: Channel[] }
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">{channel.title ?? channel.channelId}</p>
+              <p className="truncate font-medium text-slate-900">{channel.title ?? channel.channelId}</p>
               <p className="truncate text-sm text-slate-500">
                 Vérification toutes les {channel.checkFrequencyMinutes} min
                 {channel.lastCheckedAt &&
@@ -125,9 +121,9 @@ export function ChannelBoard({ initialChannels }: { initialChannels: Channel[] }
             </div>
             <button
               onClick={() => toggleMonitoring(channel)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
+              className={`badge ${
                 channel.monitoringEnabled
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-green-50 text-green-700"
                   : "bg-slate-100 text-slate-500"
               }`}
             >

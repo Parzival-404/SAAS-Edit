@@ -32,40 +32,47 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
-      <h1 className="mb-6 text-2xl font-bold">Se connecter</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-slate-300 px-4 py-2"
-        />
-        <input
-          type="password"
-          required
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-slate-300 px-4 py-2"
-        />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {loading ? "Connexion..." : "Se connecter"}
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-slate-600">
-        Pas encore de compte ?{" "}
-        <Link href="/register" className="text-brand-600 underline">
-          Créer un compte
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f5f7] px-6">
+      <div className="card w-full max-w-sm p-8">
+        <Link href="/" className="text-sm font-semibold text-slate-900">
+          SAAS-Edit
         </Link>
-      </p>
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
+          Se connecter
+        </h1>
+        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3">
+          <input
+            type="email"
+            required
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input"
+          />
+          <input
+            type="password"
+            required
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input"
+          />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary mt-1 w-full disabled:opacity-50"
+          >
+            {loading ? "Connexion..." : "Se connecter"}
+          </button>
+        </form>
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Pas encore de compte ?{" "}
+          <Link href="/register" className="font-medium text-brand-600 hover:text-brand-700">
+            Créer un compte
+          </Link>
+        </p>
+      </div>
     </main>
   );
 }

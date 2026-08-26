@@ -50,11 +50,11 @@ export function InspirationBoard({ initialItems }: { initialItems: InspirationIt
 
   return (
     <div>
-      <form onSubmit={addItem} className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:grid-cols-2">
+      <form onSubmit={addItem} className="card grid gap-3 p-4 sm:grid-cols-2">
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
+          className="input sm:col-span-2"
         >
           {Object.entries(TYPE_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
@@ -68,18 +68,18 @@ export function InspirationBoard({ initialItems }: { initialItems: InspirationIt
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={2}
-          className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
+          className="input sm:col-span-2"
         />
         <input
           placeholder="Notes (optionnel)"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 sm:col-span-2"
+          className="input sm:col-span-2"
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-700 disabled:opacity-50 sm:col-span-2 sm:w-fit"
+          className="btn-primary disabled:opacity-50 sm:col-span-2 sm:w-fit"
         >
           {loading ? "Ajout..." : "Ajouter à la base d'inspiration"}
         </button>
@@ -87,13 +87,13 @@ export function InspirationBoard({ initialItems }: { initialItems: InspirationIt
 
       <ul className="mt-6 space-y-3">
         {items.map((item) => (
-          <li key={item.id} className="rounded-lg border border-slate-200 bg-white p-4">
+          <li key={item.id} className="card p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
+                <span className="badge bg-brand-50 text-brand-700">
                   {TYPE_LABELS[item.type] ?? item.type}
                 </span>
-                <p className="mt-2">{item.content}</p>
+                <p className="mt-2 text-slate-900">{item.content}</p>
                 {item.notes && <p className="mt-1 text-sm text-slate-500">{item.notes}</p>}
               </div>
               <button

@@ -44,11 +44,12 @@ export function VideoList({ initialVideos }: { initialVideos: VideoListItem[] })
     );
   }
 
+
   return (
-    <ul className="mt-6 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+    <ul className="card mt-6 divide-y divide-slate-100">
       {videos.map((video) => (
-        <li key={video.id} className="flex items-center gap-4 p-4">
-          <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md bg-slate-100">
+        <li key={video.id} className="flex items-center gap-4 p-4 first:rounded-t-2xl last:rounded-b-2xl">
+          <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100">
             {video.thumbnailUrl && (
               <Image
                 src={video.thumbnailUrl}
@@ -61,14 +62,12 @@ export function VideoList({ initialVideos }: { initialVideos: VideoListItem[] })
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="truncate font-medium">{video.title ?? video.youtubeUrl}</p>
+              <p className="truncate font-medium text-slate-900">{video.title ?? video.youtubeUrl}</p>
               {video.source === "CHANNEL_MONITOR" && (
-                <span className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
-                  Auto
-                </span>
+                <span className="badge shrink-0 bg-brand-50 text-brand-600">Auto</span>
               )}
             </div>
-            <p className="truncate text-sm text-slate-500">{video.youtubeUrl}</p>
+            <p className="truncate text-sm text-slate-400">{video.youtubeUrl}</p>
             {video.status === "FAILED" && video.errorMessage && (
               <p className="truncate text-sm text-red-600" title={video.errorMessage}>
                 {video.errorMessage}

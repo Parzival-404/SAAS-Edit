@@ -25,10 +25,10 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-slate-100 text-slate-700",
-  SCHEDULED: "bg-blue-100 text-blue-700",
-  PUBLISHING: "bg-amber-100 text-amber-700",
-  PUBLISHED: "bg-green-100 text-green-700",
-  FAILED: "bg-red-100 text-red-700",
+  SCHEDULED: "bg-blue-50 text-blue-700",
+  PUBLISHING: "bg-amber-50 text-amber-700",
+  PUBLISHED: "bg-green-50 text-green-700",
+  FAILED: "bg-red-50 text-red-700",
 };
 
 export function ScheduledPostBoard({ initialPosts }: { initialPosts: Post[] }) {
@@ -60,10 +60,10 @@ export function ScheduledPostBoard({ initialPosts }: { initialPosts: Post[] }) {
   }
 
   return (
-    <ul className="mt-6 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+    <ul className="card mt-6 divide-y divide-slate-100">
       {posts.map((post) => (
         <li key={post.id} className="flex items-center gap-4 p-4">
-          <div className="h-16 w-10 shrink-0 overflow-hidden rounded-md bg-slate-900">
+          <div className="h-16 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-900">
             {post.clip.thumbnailUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -74,7 +74,7 @@ export function ScheduledPostBoard({ initialPosts }: { initialPosts: Post[] }) {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-medium">{post.clip.title ?? "Clip"}</p>
+            <p className="truncate font-medium text-slate-900">{post.clip.title ?? "Clip"}</p>
             <p className="truncate text-sm text-slate-500">
               {post.socialAccount.displayName}
               {post.scheduledFor &&
@@ -94,7 +94,7 @@ export function ScheduledPostBoard({ initialPosts }: { initialPosts: Post[] }) {
               </a>
             )}
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLORS[post.status] ?? ""}`}>
+          <span className={`badge ${STATUS_COLORS[post.status] ?? ""}`}>
             {STATUS_LABELS[post.status] ?? post.status}
           </span>
           {post.status === "DRAFT" && (

@@ -1,5 +1,6 @@
 import { requireUserId } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { PageHeader } from "@/components/PageHeader";
 
 const PLATFORM_LABELS: Record<string, string> = {
   TIKTOK: "TikTok",
@@ -61,11 +62,10 @@ export default async function AnalyticsPage() {
   if (posts.length === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="mt-1 text-slate-600">
-          Comparez les performances de vos clips publiés, plateforme par
-          plateforme.
-        </p>
+        <PageHeader
+          title="Analytics"
+          description="Comparez les performances de vos clips publiés, plateforme par plateforme."
+        />
         <p className="mt-6 text-sm text-slate-500">
           Aucun clip publié pour l&apos;instant. Une fois un post publié
           (onglet Publication), ses statistiques apparaîtront ici — mises à
@@ -77,28 +77,29 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-10">
-      <div>
-        <h1 className="text-2xl font-bold">Analytics</h1>
-        <p className="mt-1 text-slate-600">
-          Comparez les performances de vos clips publiés, plateforme par
-          plateforme.
-        </p>
-      </div>
+      <PageHeader
+        title="Analytics"
+        description="Comparez les performances de vos clips publiés, plateforme par plateforme."
+      />
 
       <section>
-        <h2 className="text-lg font-semibold">Par plateforme</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900">Par plateforme</h2>
         <div className="mt-3 grid gap-4 sm:grid-cols-3">
           {[...platformGroups.entries()].map(([platform, stats]) => (
-            <div key={platform} className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="font-medium">{PLATFORM_LABELS[platform] ?? platform}</p>
+            <div key={platform} className="card p-6">
+              <p className="font-medium text-slate-900">{PLATFORM_LABELS[platform] ?? platform}</p>
               <p className="mt-1 text-sm text-slate-500">{stats.count} post(s) publié(s)</p>
-              <p className="mt-2 text-2xl font-bold">{formatNumber(stats.totalViews)}</p>
-              <p className="text-xs text-slate-500">vues cumulées</p>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+                {formatNumber(stats.totalViews)}
+              </p>
+              <p className="text-xs text-slate-400">vues cumulées</p>
+              <p className="mt-3 text-sm text-slate-600">
                 Engagement moyen :{" "}
-                {stats.withEngagement > 0
-                  ? formatPercent(stats.totalEngagement / stats.withEngagement)
-                  : "—"}
+                <span className="font-medium text-slate-900">
+                  {stats.withEngagement > 0
+                    ? formatPercent(stats.totalEngagement / stats.withEngagement)
+                    : "—"}
+                </span>
               </p>
             </div>
           ))}
@@ -106,10 +107,10 @@ export default async function AnalyticsPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold">Classement des clips</h2>
-        <div className="mt-3 overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900">Classement des clips</h2>
+        <div className="card mt-3 overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
+            <thead className="border-b border-slate-100 text-xs font-medium uppercase tracking-wide text-slate-400">
               <tr>
                 <th className="px-4 py-3">Clip</th>
                 <th className="px-4 py-3">Plateforme</th>
@@ -123,7 +124,7 @@ export default async function AnalyticsPage() {
             <tbody className="divide-y divide-slate-100">
               {ranked.map((post) => (
                 <tr key={post.id}>
-                  <td className="max-w-xs truncate px-4 py-3 font-medium">{post.clip.title}</td>
+                  <td className="max-w-xs truncate px-4 py-3 font-medium text-slate-900">{post.clip.title}</td>
                   <td className="px-4 py-3 text-slate-600">
                     {PLATFORM_LABELS[post.platform] ?? post.platform}
                   </td>
@@ -131,7 +132,7 @@ export default async function AnalyticsPage() {
                   <td className="px-4 py-3">{formatNumber(post.latest?.likes)}</td>
                   <td className="px-4 py-3">{formatNumber(post.latest?.comments)}</td>
                   <td className="px-4 py-3">{formatNumber(post.latest?.shares)}</td>
-                  <td className="px-4 py-3 font-medium">
+                  <td className="px-4 py-3 font-medium text-slate-900">
                     {formatPercent(post.latest?.engagementRate)}
                   </td>
                 </tr>
@@ -142,13 +143,13 @@ export default async function AnalyticsPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold">Analyse des commentaires</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900">Analyse des commentaires</h2>
         <div className="mt-3 space-y-4">
           {withMetrics
             .filter((post) => post.commentInsight)
             .map((post) => (
-              <div key={post.id} className="rounded-lg border border-slate-200 bg-white p-4">
-                <p className="font-medium">{post.clip.title}</p>
+              <div key={post.id} className="card p-6">
+                <p className="font-medium text-slate-900">{post.clip.title}</p>
                 <p className="mt-1 text-sm text-slate-600">{post.commentInsight!.summary}</p>
                 <div className="mt-2 flex gap-4 text-xs text-slate-500">
                   <span>👍 {post.commentInsight!.positiveCount}</span>

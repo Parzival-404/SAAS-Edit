@@ -1,6 +1,7 @@
 import { requireUserId } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { ClipLibrary } from "@/components/ClipLibrary";
+import { PageHeader } from "@/components/PageHeader";
 
 export default async function ClipsPage() {
   const userId = await requireUserId();
@@ -19,11 +20,10 @@ export default async function ClipsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Bibliothèque de clips</h1>
-      <p className="mt-1 text-slate-600">
-        Prévisualisez, modifiez le titre/description/hashtags, téléchargez ou
-        programmez vos clips.
-      </p>
+      <PageHeader
+        title="Bibliothèque de clips"
+        description="Prévisualisez, modifiez le titre/description/hashtags, téléchargez ou programmez vos clips."
+      />
       <ClipLibrary initialClips={clips} socialAccounts={socialAccounts} />
     </div>
   );

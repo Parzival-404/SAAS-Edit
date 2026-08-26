@@ -23,9 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
 export function StatusBadge({ status }: { status: string }) {
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-medium ${
-        STATUS_COLORS[status] ?? "bg-slate-100 text-slate-700"
-      }`}
+      className={`badge ${STATUS_COLORS[status] ?? "bg-slate-100 text-slate-700"}`}
     >
       {STATUS_LABELS[status] ?? status}
     </span>
