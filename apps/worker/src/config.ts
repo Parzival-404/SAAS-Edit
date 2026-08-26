@@ -31,4 +31,21 @@ export const config = {
   // Fréquence à laquelle on vérifie quels posts programmés sont dus
   // (scheduledFor atteint, ou immédiat si non renseigné).
   publishSchedulerTickMs: Number(process.env.PUBLISH_SCHEDULER_TICK_MS ?? 60 * 1000),
+
+  // Fréquence du tick qui déclenche la vérification des relevés
+  // analytics dus (indépendante de l'intervalle minimum entre deux
+  // relevés d'un même post, ci-dessous).
+  analyticsTickMs: Number(process.env.ANALYTICS_TICK_MS ?? 15 * 60 * 1000),
+  // Intervalle minimum entre deux relevés de métriques pour un même post
+  // publié — évite de spammer les APIs plateformes.
+  analyticsRefreshIntervalMs: Number(
+    process.env.ANALYTICS_REFRESH_INTERVAL_MS ?? 60 * 60 * 1000,
+  ),
+
+  // Nombre de commentaires maximum récupérés par analyse.
+  commentAnalysisMaxComments: Number(process.env.COMMENT_ANALYSIS_MAX_COMMENTS ?? 100),
+  // Intervalle minimum entre deux analyses de commentaires pour un même post.
+  commentAnalysisIntervalMs: Number(
+    process.env.COMMENT_ANALYSIS_INTERVAL_MS ?? 24 * 60 * 60 * 1000,
+  ),
 };

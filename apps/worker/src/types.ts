@@ -28,3 +28,13 @@ export type HighlightMoment = {
   titleVariants: string[];
   hookVariants: string[];
 };
+
+export type CommentAnalysisResult = {
+  summary: string;
+  positiveCount: number;
+  negativeCount: number;
+  neutralCount: number;
+  topThemes: string[];
+  faqs: string[];
+  contentIdeas: string[];
+};

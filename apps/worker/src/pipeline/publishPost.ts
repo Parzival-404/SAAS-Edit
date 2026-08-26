@@ -1,4 +1,5 @@
 import type { Clip, ScheduledPost, SocialAccount } from "@saas-edit/db";
+import { safeText } from "../lib/httpUtils.js";
 
 export class PublishError extends Error {}
 
@@ -190,12 +191,4 @@ async function publishToInstagramReels(
   const published = (await publishRes.json()) as { id: string };
 
   return { platformPostId: published.id, platformPostUrl: null };
-}
-
-async function safeText(res: Response): Promise<string> {
-  try {
-    return await res.text();
-  } catch {
-    return "";
-  }
 }

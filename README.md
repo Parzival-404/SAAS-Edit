@@ -55,9 +55,12 @@ avancés arrivent dans les phases suivantes (voir [Roadmap](#roadmap)).
 - **Frontend/Backend** : Next.js 14 (App Router), API routes, Tailwind CSS.
 - **Base de données** : PostgreSQL + Prisma (`packages/db`, schéma partagé).
 - **File d'attente** : BullMQ + Redis — le traitement vidéo est toujours
-  asynchrone, jamais bloquant côté web. Deux files : `video-processing`
-  (pipeline par vidéo) et `channel-monitor-tick` (sondage périodique des
-  chaînes connectées, via un job scheduler BullMQ).
+  asynchrone, jamais bloquant côté web. Quatre files (jobs scheduler
+  BullMQ pour les ticks) : `video-processing` (pipeline par vidéo),
+  `channel-monitor-tick` (sondage des chaînes connectées),
+  `publish-scheduler-tick` (publication des posts programmés dus),
+  `insights-tick` (relevé des métriques + analyse des commentaires des
+  posts publiés).
 - **Worker vidéo** : service Node séparé (conteneurisé), avec `ffmpeg` et
   `yt-dlp` pour ne jamais faire de traitement lourd dans le serverless.
 - **Stockage** : tout stockage S3-compatible (Cloudflare R2 recommandé).
@@ -257,13 +260,31 @@ bien la vidéo de bout en bout.
 - ☐ Analyse des tendances (formats, hooks, sons) via les APIs
   disponibles, utilisée comme inspiration — jamais de copie directe.
 
-### V4 — Analytics et amélioration continue
-- Récupération des performances post-publication (vues, likes,
-  commentaires, partages, rétention) via les APIs plateformes.
-- Comparaison des clips, classement, plateforme/hook les plus performants.
-- Analyse des commentaires (résumé, sentiment, idées de contenu).
-- Boucle d'apprentissage : les performances passées influencent le
-  scoring des futurs moments forts et les réglages par défaut.
+### 🚧 V4 — Analytics et amélioration continue (en cours)
+- ✅ Récupération des performances post-publication (vues, likes,
+  commentaires, partages, taux d'engagement) via les APIs officielles —
+  YouTube Data API v3 (`videos.list`), TikTok Content Posting API v2
+  (Query Video List), Instagram Graph API (`/insights`). Relevés
+  successifs dans le temps (`PostMetricsSnapshot`), pas un simple
+  instantané écrasé — permet de tracer l'évolution. La rétention
+  (regarder jusqu'où) nécessite la YouTube Analytics API (scope OAuth
+  différent, plus lourd à obtenir) — non implémentée, documentée comme
+  limite connue plutôt que simulée.
+- ✅ Onglet Analytics : comparaison par plateforme (vues cumulées,
+  engagement moyen), classement des clips par engagement.
+- ✅ Analyse des commentaires : récupération du texte (YouTube
+  `commentThreads`, Instagram `/comments` — TikTok n'a pas d'endpoint
+  public stable pour lire le texte des commentaires au moment de
+  l'écriture, seules les statistiques agrégées sont disponibles côté
+  TikTok) puis résumé par Claude (sentiment, thèmes récurrents, FAQ,
+  idées de futurs clips), affiché dans l'onglet Analytics.
+- ✅ Boucle d'amélioration continue : les clips publiés les mieux reçus
+  (triés par taux d'engagement) sont injectés dans le prompt d'analyse
+  des futures vidéos (`performanceLearnings.ts`) — Claude reconnaît
+  lui-même les motifs qui fonctionnent pour l'audience de chaque
+  utilisateur, sans scoring statistique codé en dur.
+- ☐ Analyse des tendances (formats, hooks, sons) via les APIs
+  disponibles, utilisée comme inspiration — jamais de copie directe.
 
 ## Contraintes respectées par design
 

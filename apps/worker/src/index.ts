@@ -4,11 +4,14 @@ import { config } from "./config.js";
 import { processVideo } from "./pipeline/processVideo.js";
 import { checkDueChannels } from "./pipeline/monitorChannels.js";
 import { publishDuePosts } from "./pipeline/publishScheduler.js";
+import { refreshDueMetrics } from "./pipeline/analyticsScheduler.js";
+import { refreshDueCommentAnalyses } from "./pipeline/commentAnalysisScheduler.js";
 import type { VideoProcessingJobData } from "./types.js";
 
 const VIDEO_QUEUE_NAME = "video-processing";
 const CHANNEL_MONITOR_QUEUE_NAME = "channel-monitor-tick";
 const PUBLISH_SCHEDULER_QUEUE_NAME = "publish-scheduler-tick";
+const INSIGHTS_QUEUE_NAME = "insights-tick";
 const connection = { url: config.redisUrl };
 
 // ---- Traitement d'une vidéo (mode manuel + mode automatique) ----
@@ -88,10 +91,42 @@ schedulePublishTick().catch((err) => {
   console.error("[publish] impossible de programmer le tick:", err);
 });
 
+// ---- Analytics + commentaires : tick périodique post-publication ----
+
+const insightsQueue = new Queue(INSIGHTS_QUEUE_NAME, { connection });
+
+const insightsWorker = new Worker(
+  INSIGHTS_QUEUE_NAME,
+  async () => {
+    await refreshDueMetrics();
+    await refreshDueCommentAnalyses();
+  },
+  { connection, concurrency: 1 },
+);
+
+insightsWorker.on("failed", (job, err) => {
+  console.error("[insights] tick en échec:", err.message);
+});
+
+async function scheduleInsightsTick(): Promise<void> {
+  await insightsQueue.upsertJobScheduler(
+    "insights-tick",
+    { every: config.analyticsTickMs },
+    { name: "tick" },
+  );
+}
+
+scheduleInsightsTick().catch((err) => {
+  console.error("[insights] impossible de programmer le tick:", err);
+});
+
 console.log("[worker] en écoute sur la file", VIDEO_QUEUE_NAME);
 console.log(
   `[worker] surveillance des chaînes toutes les ${config.channelMonitorTickMs / 1000}s`,
 );
 console.log(
   `[worker] publication programmée vérifiée toutes les ${config.publishSchedulerTickMs / 1000}s`,
+);
+console.log(
+  `[worker] analytics/commentaires vérifiés toutes les ${config.analyticsTickMs / 1000}s`,
 );

@@ -3,6 +3,7 @@ import { prisma, VideoStatus } from "@saas-edit/db";
 import { downloadYoutubeVideo } from "./downloadVideo.js";
 import { transcribeVideo } from "./transcribe.js";
 import { analyzeHighlights } from "./analyzeHighlights.js";
+import { getPerformanceLearningsBlock } from "./performanceLearnings.js";
 import { renderClip } from "./renderClip.js";
 import { uploadFile } from "../lib/storage.js";
 
@@ -40,12 +41,14 @@ export async function processVideo(sourceVideoId: string): Promise<void> {
       where: { userId: sourceVideo.userId },
     });
     const settings = sourceVideo.user.settings;
+    const performanceLearnings = await getPerformanceLearningsBlock(sourceVideo.userId);
     const moments = await analyzeHighlights(transcript, {
       minClips: settings?.minClipsPerVideo ?? 3,
       maxClips: settings?.maxClipsPerVideo ?? 8,
       targetClipDurationS: settings?.targetClipDurationS ?? 45,
       tone: settings?.tone ?? "VIRAL",
       inspiration,
+      performanceLearnings,
     });
 
     await setStatus(sourceVideoId, "EDITING");

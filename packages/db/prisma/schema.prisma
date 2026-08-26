@@ -308,6 +308,9 @@ model ScheduledPost {
   platformPostUrl String?
   errorMessage    String? @db.Text
 
+  metricsSnapshots PostMetricsSnapshot[]
+  commentInsight   CommentInsight?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -323,4 +326,48 @@ enum PostStatus {
   PUBLISHING
   PUBLISHED
   FAILED
+}
+
+// Un relevé par appel du worker (voir analyticsScheduler.ts) : permet de
+// tracer l'évolution des performances dans le temps, pas juste un
+// instantané figé.
+model PostMetricsSnapshot {
+  id              String        @id @default(cuid())
+  scheduledPostId String
+  scheduledPost   ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+
+  capturedAt DateTime @default(now())
+
+  views    Int?
+  likes    Int?
+  comments Int?
+  shares   Int?
+  // (likes+comments+shares)/views — null si views absent/nul.
+  engagementRate Float?
+
+  createdAt DateTime @default(now())
+
+  @@index([scheduledPostId, capturedAt])
+}
+
+// Une analyse par post (régénérée à chaque exécution) : résumé des
+// réactions, sentiment, questions fréquentes, idées de futurs clips.
+model CommentInsight {
+  id              String        @id @default(cuid())
+  scheduledPostId String        @unique
+  scheduledPost   ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+
+  summary  String @db.Text
+  positiveCount Int @default(0)
+  negativeCount Int @default(0)
+  neutralCount  Int @default(0)
+
+  topThemes    String[]
+  faqs         String[]
+  contentIdeas String[]
+
+  commentsAnalyzed Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

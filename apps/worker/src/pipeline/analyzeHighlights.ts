@@ -8,6 +8,9 @@ type AnalyzeOptions = {
   targetClipDurationS: number;
   tone: string;
   inspiration: { type: string; content: string; notes: string | null }[];
+  // Amélioration continue : résumé des clips précédents les mieux reçus
+  // par l'audience de cet utilisateur, voir performanceLearnings.ts.
+  performanceLearnings?: string | null;
 };
 
 const anthropic = new Anthropic({ apiKey: config.anthropicApiKey });
@@ -48,6 +51,7 @@ Durée cible par clip : ~${options.targetClipDurationS} secondes (ne pas dépass
 
 Références/style de la marque (base d'inspiration) :
 ${inspirationBlock}
+${options.performanceLearnings ? `\n${options.performanceLearnings}\n` : ""}
 
 Règles :
 - Choisis des extraits qui fonctionnent sans contexte (compréhensibles seuls).
